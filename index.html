@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>影片剪輯器</title>
+</head>
+<style>
+    body {
+    --bgColor: rgb(39, 39, 39);
+    --fontColor: #ffffff;
+        background: var(--bgColor);
+    }
+    button{
+        border-radius: 10px;
+        border-color: #ffffff;
+    }
+    .buttoncls{
+        border-radius: 10px;
+        border-color: #00ffbf;
+        background: #00ffbf;
+    }
+    p,#fileInput,#uploadfile1, div,label {
+        color: var(--fontColor);
+    }
+    #uploadfile1{
+        position: absolute;top: 10px; left: 1250px;
+    }
+    #uploadfile1label{
+        position: absolute;top: 10px; left: 1100px;
+    }
+    #inputstartval,#inputendval{
+        width: 60px;
+    }
+    #inputspacetime, #inputdurationtime{
+        width: 20px;
+    }
+    #fsavesec{
+        position: absolute;top: 15px; left: 600px;
+    }
+    #fsavetime{
+        position: absolute;top: 15px; left: 750px;
+    }
+    #fsaveformal{
+        position: absolute;top: 15px; left: 900px;
+    }
+    video{
+        object-fit:cover;position: absolute;top: 60px; left: 600px;
+    }
+    #showLevelBlocks{
+        position: absolute;top: 10px; left:400px;overflow: auto;height: 800px;
+    }
+    #safeloadbtn{
+        position: absolute;top: 15px; left: 1500px;
+    }
+</style>
+<body>
+    <p id="rooturl"></div></p>
+    <label for="fileInput">影片名稱:</label>
+    <input type="file" id="fileInput" accept="video/*" multiple onchange="changevideoname()"/>
+    <p></p>
+    <label for="dirpath">根目錄到影片資料夾</label>
+    <input type="text" id="dirpath" value="./" onchange="f1()">
+    <p></p>
+    <p></p>
+    <button onclick="f0(0)">0p</button>
+    <button onclick="f0(240)">240p</button>
+    <button onclick="f0(360)">360p</button>
+    <button onclick="f0(480)">480p</button>
+    <button onclick="f0(720)">720p</button>
+    <button onclick="f0(-1)">Default</button>
+    <p></p>
+    <label for="selectoptionnum">影片時間軌道數:</label>
+    <input style="width: 30px;" type="text" id="selectoptionnum" onchange="initselect()" value="5">
+    <p>----------------------------------------------------------------</p>
+    <div id="forlabel1" style="display: inline-block;">
+        layerMerge(-1):
+    </div>
+    <button onclick="mergelayerfunc(0)">Orinal</button>
+    <button onclick="mergelayerfunc(1)">Ascend</button>
+    <p></p>
+    <label for="merge2layerNorigin">AllMerge to layerN:</label>
+    <select id="merge2layerNorigin" onchange="allmerge2layerN(0)">
+        <option value="-1">Origin</option>
+        <option value="0">Level0</option>
+        <option value="1">Level1</option>
+        <option value="2">Level2</option>
+        <option value="3">Level3</option>
+        <option value="4">Level4</option>
+    </select>     
+    <select id="merge2layerNascend" onchange="allmerge2layerN(1)">
+        <option value="-1">Ascend</option>
+        <option value="0">Level0</option>
+        <option value="1">Level1</option>
+        <option value="2">Level2</option>
+        <option value="3">Level3</option>
+        <option value="4">Level4</option>
+    </select>     
+    <p></p>
+    
+    <select id="n2bufdb" onchange="f9(1)">
+        <option value="-1">LevelN -> BUF</option>
+        <option value="0">Level0</option>
+        <option value="1">Level1</option>
+        <option value="2">Level2</option>
+        <option value="3">Level3</option>
+        <option value="4">Level4</option>
+    </select>     
+    <select id="buf2ndb" onchange="f9(2)">
+        <option value="-1">BUF -> LevelN</option>
+        <option value="0">Level0</option>
+        <option value="1">Level1</option>
+        <option value="2">Level2</option>
+        <option value="3">Level3</option>
+        <option value="4">Level4</option>
+    </select>     
+    <p></p>
+    <p>----------------------------------------------------------------</p>
+    <label for="selectlevels1">clipLevels</label>
+    <select id="selectlevels1">
+        <option value="-1">選擇Level層級</option>
+        <option value="0">Level0</option>
+        <option value="1">Level1</option>
+        <option value="2">Level2</option>
+        <option value="3">Level3</option>
+        <option value="4">Level4</option>
+        <option value="999">ReaderBuf</option>
+    </select>
+    <p></p>
+    <label for="inputstart">startTime</label>
+    <input type="text" id="inputstartval" value="00 00 00" onchange="f53()">
+    <input id="inputstart" type="range" min="0" max="100" step="0.1" value="0" onchange="f51()"/>
+    <button id="nowTime1" onclick="f55()">nowTime</button>
+    <p></p>
+    <label for="inputend">endTime</label>
+    <input type="text" id="inputendval" value="00 00 00" onchange="f54()">
+    <input id="inputend" type="range" min="0" max="100" step="0.1" value="0" onchange="f52()"/>
+    <button id="nowTime2" onclick="f56()">nowTime</button>
+    <p></p>
+    <button onclick="f7()">submit</button>
+    <p>----------------------------------------------------------------</p>
+    <label for="inputdurationtime">持續:</label>
+    <input type="text" id="inputdurationtime" value="1" onchange="checkrenderspacial()">
+    <label for="inputspacetime">間隔:</label>
+    <input type="text" id="inputspacetime" value="1" onchange="checkrenderspacial()">
+    <button id="rendervidbtn" onclick="rendersneakvid()">試看</button>
+    &emsp;&emsp;&emsp;
+    <button id="rendervidsubmit" onclick="rendersneakvidsubmit()">RenderSubmit</button>
+    <p>----------------------------------------------------------------</p>
+    <!--
+    <button onclick="f3(20,30)">20to30</button>
+    <button onclick="f3(25,35)">25to35</button>
+    <button onclick="f3(27,40)">27to40</button>
+    <button onclick="f4()">STOPMASK</button>
+    -->
+    <p></p>
+    <label for="selectlevels2">showLevels</label>
+    <select id="selectlevels2" onchange="f8()">
+        <option value="-1">秀出Level內容</option>
+        <option value="0">Level0</option>
+        <option value="1">Level1</option>
+        <option value="2">Level2</option>
+        <option value="3">Level3</option>
+        <option value="4">Level4</option>
+        <option value="999">ReaderBuf</option>
+    </select> 
+    <button id="clearlayerbtn" onclick="f10()">clear(-1)</button>
+    <p></p>
+    <button onclick="fsort(0)">Orinal</button>
+    <button onclick="fsort(1)">Ascend</button>
+    <button onclick="fsort(2)">Descend</button>
+    <p></p>
+
+    <button onclick="f6()">MASKVIDEO</button>
+    <button onclick="f4()">STOPMASK</button>
+    <p></p>
+
+    <label for="input1" id="input1val">loop video rate:10x</label>
+    <input id="input1" type="range" min="1" max="15" step="0.1" value="15" onchange="f5()"/>
+    <p></p>
+    <video  width="360" height="240" controls id="video1">
+        <source id='changeSrc' src="./" type="video/mp4">
+    </video>
+    <label id="uploadfile1label" for="uploadfile1">上傳時間碼(edl, txt)</label>
+    <input id="uploadfile1" type=file   accept=".txt, .html, .edl" name="files[]" >
+    <select id="fsavesec" onchange="fsave(1)">
+        <option value="-1">Ascend</option>
+        <option value="0">Level0</option>
+        <option value="1">Level1</option>
+        <option value="2">Level2</option>
+        <option value="3">Level3</option>
+        <option value="4">Level4</option>
+    </select>     
+    <select id="fsavetime" onchange="fsave(2)">
+        <option value="-1">Ascend</option>
+        <option value="0">Level0</option>
+        <option value="1">Level1</option>
+        <option value="2">Level2</option>
+        <option value="3">Level3</option>
+        <option value="4">Level4</option>
+    </select>   
+    <select id="fsaveformal" onchange="fsave(3)">
+        <option value="-1">Ascend</option>
+        <option value="0">Level0</option>
+        <option value="1">Level1</option>
+        <option value="2">Level2</option>
+        <option value="3">Level3</option>
+        <option value="4">Level4</option>
+    </select>   
+    <p></p>
+    <div id="showLevelBlocks"></div>
+    <button id='safeloadbtn' onclick="safeload()">Load</button>
+</body>
+<script type="text/javascript">
+
+    // tool
+    function lcs_DP(a, b) {
+        var m = a.length, n = b.length,
+            C = [], i, j;
+        for (i = 0; i <= m; i++) C.push([0]);
+        for (j = 0; j < n; j++) C[0].push(0);
+        for (i = 0; i < m; i++)
+            for (j = 0; j < n; j++)
+                C[i+1][j+1] = a[i] === b[j] ? C[i][j]+1 : Math.max(C[i+1][j], C[i][j+1]);
+        return (function bt(i, j) {
+            if (i*j === 0) { return ""; }
+            if (a[i-1] === b[j-1]) { return bt(i-1, j-1) + a[i-1]; }
+            return (C[i][j-1] > C[i-1][j]) ? bt(i, j-1) : bt(i-1, j);
+        }(m, n));
+    }
+
+    var sec2time = (ss) => {
+        hr = parseInt(ss / 3600)
+        min = parseInt((ss % 3600)/60)
+        sec = parseInt(ss % 60)
+        hr = String(hr)
+        min = String(min)
+        sec =String(sec)
+        if(hr.length < 2){hr = '0'+hr}
+        if(min.length < 2){min = '0'+min}
+        if(sec.length < 2){sec = '0'+sec}
+        return hr+':'+min+':'+sec
+    }
+
+    var time2sec = (x) => {
+        if(x.length != 3){
+            throw 'time2sec needs a list has 3 eles'
+        }
+        return parseInt(x[2]) + parseInt(x[1])*60 + parseInt(x[0])*3600
+    }
+    
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+
+
+    /*
+    ------------------------------------------------------------------------------------------------------------
+    ------------------------------------------------------------------------------------------------------------
+    --------------------                             downloadtool                          ---------------------
+    --------------------                             downloadtool                          ---------------------
+    --------------------                             downloadtool                          ---------------------
+    --------------------                             downloadtool                          ---------------------
+    ------------------------------------------------------------------------------------------------------------
+    ------------------------------------------------------------------------------------------------------------
+    */
+        var _global = typeof window === 'object' && window.window === window
+    ? window : typeof self === 'object' && self.self === self
+    ? self : typeof global === 'object' && global.global === global
+    ? global
+    : this
+    function bom (blob, opts) {
+    if (typeof opts === 'undefined') opts = { autoBom: false }
+    else if (typeof opts !== 'object') {
+        console.warn('Deprecated: Expected third argument to be a object')
+        opts = { autoBom: !opts }
+    }
+    if (opts.autoBom && /^\s*(?:text\/\S*|application\/xml|\S*\/\S*\+xml)\s*;.*charset\s*=\s*utf-8/i.test(blob.type)) {
+        return new Blob([String.fromCharCode(0xFEFF), blob], { type: blob.type })
+    }
+    return blob
+    }
+    function download (url, name, opts) {
+    var xhr = new XMLHttpRequest()
+    xhr.open('GET', url)
+    xhr.responseType = 'blob'
+    xhr.onload = function () {
+        saveAs(xhr.response, name, opts)
+    }
+    xhr.onerror = function () {
+        console.error('could not download file')
+    }
+    xhr.send()
+    }
+    function corsEnabled (url) {
+    var xhr = new XMLHttpRequest()
+    xhr.open('HEAD', url, false)
+    try {
+        xhr.send()
+    } catch (e) {}
+    return xhr.status >= 200 && xhr.status <= 299
+    }
+    function click (node) {
+    try {
+        node.dispatchEvent(new MouseEvent('click'))
+    } catch (e) {
+        var evt = document.createEvent('MouseEvents')
+        evt.initMouseEvent('click', true, true, window, 0, 0, 0, 80,
+                            20, false, false, false, false, 0, null)
+        node.dispatchEvent(evt)
+    }
+    }
+    var isMacOSWebView = _global.navigator && /Macintosh/.test(navigator.userAgent) && /AppleWebKit/.test(navigator.userAgent) && !/Safari/.test(navigator.userAgent)
+    var saveAs = _global.saveAs || (
+    (typeof window !== 'object' || window !== _global)
+        ? function saveAs () { /* noop */ }
+    : ('download' in HTMLAnchorElement.prototype && !isMacOSWebView)
+    ? function saveAs (blob, name, opts) {
+        var URL = _global.URL || _global.webkitURL
+        var a = document.createElementNS('http://www.w3.org/1999/xhtml', 'a')
+        name = name || blob.name || 'download'
+        a.download = name
+        a.rel = 'noopener' // tabnabbing
+        if (typeof blob === 'string') {
+        a.href = blob
+        if (a.origin !== location.origin) {
+            corsEnabled(a.href)
+            ? download(blob, name, opts)
+            : click(a, a.target = '_blank')
+        } else {
+            click(a)
+        }
+        } else {
+        a.href = URL.createObjectURL(blob)
+        setTimeout(function () { URL.revokeObjectURL(a.href) }, 4E4) // 40s
+        setTimeout(function () { click(a) }, 0)
+        }
+    }
+    : 'msSaveOrOpenBlob' in navigator
+    ? function saveAs (blob, name, opts) {
+        name = name || blob.name || 'download'
+
+        if (typeof blob === 'string') {
+        if (corsEnabled(blob)) {
+            download(blob, name, opts)
+        } else {
+            var a = document.createElement('a')
+            a.href = blob
+            a.target = '_blank'
+            setTimeout(function () { click(a) })
+        }
+        } else {
+        navigator.msSaveOrOpenBlob(bom(blob, opts), name)
+        }
+    }
+    : function saveAs (blob, name, opts, popup) {
+        popup = popup || open('', '_blank')
+        if (popup) {
+        popup.document.title =
+        popup.document.body.innerText = 'downloading...'
+        }
+
+        if (typeof blob === 'string') return download(blob, name, opts)
+
+        var force = blob.type === 'application/octet-stream'
+        var isSafari = /constructor/i.test(_global.HTMLElement) || _global.safari
+        var isChromeIOS = /CriOS\/[\d]+/.test(navigator.userAgent)
+        if ((isChromeIOS || (force && isSafari) || isMacOSWebView) && typeof FileReader !== 'undefined') {
+        var reader = new FileReader()
+        reader.onloadend = function () {
+            var url = reader.result
+            url = isChromeIOS ? url : url.replace(/^data:[^;]*;/, 'data:attachment/file;')
+            if (popup) popup.location.href = url
+            else location = url
+            popup = null // reverse-tabnabbing #460
+        }
+        reader.readAsDataURL(blob)
+        } else {
+        var URL = _global.URL || _global.webkitURL
+        var url = URL.createObjectURL(blob)
+        if (popup) popup.location = url
+        else location.href = url
+        popup = null // reverse-tabnabbing #460
+        setTimeout(function () { URL.revokeObjectURL(url) }, 4E4) // 40s
+        }
+    }
+    )
+    _global.saveAs = saveAs.saveAs = saveAs
+    if (typeof module !== 'undefined') {
+    module.exports = saveAs;
+    }
+    /*
+    ------------------------------------------------------------------------------------------------------------
+    ------------------------------------------------------------------------------------------------------------
+    --------------------                             downloadtool                          ---------------------
+    --------------------                             downloadtool                          ---------------------
+    --------------------                             downloadtool                          ---------------------
+    --------------------                             downloadtool                          ---------------------
+    ------------------------------------------------------------------------------------------------------------
+    ------------------------------------------------------------------------------------------------------------
+    */
+
+    var ROOTURL = window.location.href.split('/').slice(3,window.location.href.split('/').length-1).join("/");
+    document.getElementById('rooturl').innerHTML = '根目錄: '+ROOTURL
+
+    var STOPLOOP = 1
+    var LOOPPLAYBACKTATE = 1
+    var inputName = document.getElementById('dirpath')
+    
+    var vid = document.getElementById('video1')
+    var progressloopvideorate = document.getElementById('input1')
+    var selectlevels = document.getElementById('selectlevels1')
+    var showlevels = document.getElementById('selectlevels2')
+    var showlevelsblocks = document.getElementById('showLevelBlocks')
+    var progressstarttime1 = document.getElementById('inputstart')
+    var progressendtime1 = document.getElementById('inputend')
+    var DURATION = 0
+    var WIDTH = 10000000000
+    var HEIGHT = 10000000000
+    var DIR = './'
+    var VIDEONAME = ''
+    var SAFELOADED = 0
+    var STARTTIME1 = 0
+    var ENDTIME1 = 0
+    var MYGLOBALTIME1 = 33333
+
+    var testMask = []
+    
+    var dblevels = {'0':testMask}
+
+    var inputdb1 = document.getElementById('uploadfile1')
+    var buf2ndb = document.getElementById('buf2ndb')
+    var n2bufdb = document.getElementById('n2bufdb')
+    var merge2layerNorigin = document.getElementById('merge2layerNorigin')
+    var merge2layerNascend = document.getElementById('merge2layerNascend')
+    var fsavesec = document.getElementById('fsavesec')
+    var fsavetime = document.getElementById('fsavetime')
+    var fsaveformal = document.getElementById('fsaveformal')
+    var SNEAKVID = []
+
+    var CHECKTIMEVAR = 20;
+    
+
+    var safesave = ()=>{
+        tmp = {}
+        tmp['MYGLOBALTIME1'] = MYGLOBALTIME1
+        tmp['VIDEONAME'] = VIDEONAME
+        tmp['inputName'] = inputName.value
+        tmp['dblevels'] = dblevels
+        tmp['selectoptionnum'] = selectoptionnum.value
+        localStorage['db'] = JSON.stringify(tmp)
+    }
+
+    var dbloader = () => {
+        for(i in dblevels){
+            for(j in dblevels[i]){
+                MYGLOBALTIME1 += 1
+                dblevels[i][j].push(MYGLOBALTIME1)
+            }
+        }
+    }
+    dbloader()
+
+
+    
+    
+
+    vid.addEventListener('emptied',()=>{
+        console.log(`no video...`);
+        SAFELOADED = 0
+        DURATION = 0
+    })
+
+    var loadvideo = (np=480)=>{
+        vid.onloadedmetadata =  function(){
+            console.log('metadata loaded!');
+            console.log(this.duration);//this refers to myVideo
+            DURATION = this.duration
+            WIDTH = this.videoWidth
+            HEIGHT = this.videoHeight
+            vid.setAttribute('width',String(WIDTH <= HEIGHT? np : parseInt(np*WIDTH/HEIGHT)))
+            vid.setAttribute('height',String(WIDTH <= HEIGHT? parseInt(np*HEIGHT/WIDTH) : np))
+            console.log(vid.width, vid.height)
+            SAFELOADED = 1
+            progressstarttime1.value = 0
+            progressendtime1.value = 0
+        };
+    }
+    loadvideo()
+
+    document.addEventListener('keydown',(e)=>{
+        UPDOWN = 5
+        RIGHTLEFT = 1
+        if(e.key === 'PageUp' || e.key ==='F5'){
+                console.log('hello f5 preventDefault')
+                e.preventDefault()
+        }
+        if(SAFELOADED == 1){
+            // 'ArrowDown' 'ArrowUp' 'ArrowLeft' 'ArrowRight'
+            if(e.key === 'ArrowDown' || e.key === 'S'|| e.key === 's'){
+                vid.currentTime = vid.currentTime - UPDOWN > 0? vid.currentTime - UPDOWN: 0;
+                if(vid.paused)vid.play();
+            }
+            else if(e.key === 'ArrowUp' || e.key === 'W'|| e.key === 'w'){
+                vid.currentTime = vid.currentTime + UPDOWN < DURATION? vid.currentTime + UPDOWN: DURATION;
+                if(vid.paused && vid.currentTime < DURATION)vid.play()
+            }
+            else if(e.key === 'ArrowLeft'|| e.key === 'A'|| e.key === 'a'){
+                vid.currentTime = vid.currentTime - RIGHTLEFT > 0? vid.currentTime - RIGHTLEFT: 0;
+                if(vid.paused)vid.play();
+            }
+            else if(e.key === 'ArrowRight'|| e.key === 'D'|| e.key === 'd'){
+                vid.currentTime = vid.currentTime + RIGHTLEFT < DURATION? vid.currentTime + RIGHTLEFT: DURATION;
+                if(vid.paused && vid.currentTime < DURATION)vid.play()
+            }
+            else if(e.key === ' '){
+                if(vid.paused && vid.currentTime < DURATION)vid.play();
+                else if(!vid.paused)vid.pause();
+            }
+            // 加入到starttime
+            else if(e.key === 'q' || e.key === 'Q'){
+                f55()
+            }
+            // 加入到endtime
+            else if(e.key === 'e' || e.key === 'E'){
+                f56()
+            }
+        }   
+    })
+    document.addEventListener('wheel',(e)=>{
+        WHEELUPDOWN = 1
+        if(SAFELOADED){
+            if(e.deltaY < 0){
+                vid.currentTime = vid.currentTime + WHEELUPDOWN < DURATION? vid.currentTime + WHEELUPDOWN: DURATION;
+                if(vid.paused && vid.currentTime < DURATION)vid.play()                
+            }
+            else if(e.deltaY > 0){
+                vid.currentTime = vid.currentTime - WHEELUPDOWN > 0? vid.currentTime - WHEELUPDOWN: 0;
+                if(vid.paused)vid.play();
+            }
+        }
+    })
+
+    var f0 = (np=-1) => {
+        if(np == 0){
+            vid.pause()
+        }
+        else{
+            vid.play()
+        }
+        if(np == -1){
+            vid.setAttribute('width',WIDTH);
+            vid.setAttribute('height',HEIGHT);
+        }
+        else{
+        vid.setAttribute('width',String(WIDTH <= HEIGHT? np : parseInt(np*WIDTH/HEIGHT)))
+        vid.setAttribute('height',String(WIDTH <= HEIGHT? parseInt(np*HEIGHT/WIDTH) : np))
+        }
+        console.log(vid.width, vid.height)
+    }
+    
+    var f11 =  () => {
+        vid.pause()
+        ele = document.getElementById('changeSrc')
+        ele.setAttribute('src',DIR+VIDEONAME)
+        console.log(DIR+VIDEONAME)
+        vid.load()  
+        vid.play()
+        loadvideo()
+    }
+    var f1 = ()=>{
+        console.log(inputName.value)
+        DIR = inputName.value
+        if(DIR[DIR.length-1]!='/' && DIR[DIR.length-1]!='\\'){
+            inputName.value += '/'
+            return f1();
+        }
+        if(DIR.trim().slice(0,2) != './'){
+            tmp = DIR.trim().replaceAll('\\','/').split('/').filter((x)=>{if(x.length>0)return true})
+            tmp2 = ROOTURL.trim().replaceAll('\\','/').split('/').filter((x)=>{if(x.length>0)return true})
+            door = 1;
+            for(let i = 0; i < tmp2.length ; i ++){
+                try {
+                    if(tmp[i].trim().toLowerCase() != tmp2[i].trim().toLowerCase())door = 0;
+                } catch (error) {
+                    door = 0;
+                }
+            }
+            if(door === 1){
+                if(tmp.length === tmp2.length){
+                    inputName.value = './';
+                }
+                else{
+                    inputName.value = './' + tmp.slice(tmp2.length, tmp.length).join('/')+'/';
+                }
+            }else{
+                inputName.value = './'
+            }
+            f1();
+        }
+        f11()
+    }
+    function changevideoname () {
+        VIDEONAME = document.getElementById('fileInput').files.item(0).name; 
+        //   alert('Selected file: ' + name.files.item(0).name);
+        //   alert('Selected file: ' + name.files.item(0).size);
+        //   alert('Selected file: ' + name.files.item(0).type);
+        f11()
+    };
+    
+    var f3 = async (ss,ee,reLoop = 1,id = -1) => {
+        STOPLOOP = 1;
+        await sleep(CHECKTIMEVAR);
+        startTime = ss
+        endTime = ee
+        if(ss >= DURATION || ee >= DURATION){
+            console.log('start time offset longer than vid!')
+            return
+        }
+        vid.currentTime = startTime
+        vid.playbackRate = LOOPPLAYBACKTATE;
+        if(vid.paused){vid.play();}
+        if(id!=-1){document.getElementById(id).setAttribute('class','buttoncls')}
+        STOPLOOP = 0;
+        function checkTime() {
+            //console.log(vid.currentTime)
+            if (vid.paused || STOPLOOP){
+                vid.playbackRate = 1;
+                STOPLOOP = 1;
+                if(id!=-1){document.getElementById(id).setAttribute('class','')}
+                return
+            }
+            if (vid.currentTime >= endTime || vid.currentTime < startTime) {
+                if(reLoop != 1){
+                    STOPLOOP = 1;
+                }
+                else{
+                    vid.currentTime = startTime
+                }
+            }
+            setTimeout(checkTime, CHECKTIMEVAR);
+        }
+        checkTime();
+    }  
+    var f4 = () => {
+        STOPLOOP = 1
+        vid.playbackRate = 1;
+    }  
+    var f5 = ()=>{
+        console.log(progressloopvideorate.value)
+        LOOPPLAYBACKTATE = progressloopvideorate.value
+        if(STOPLOOP!== 1){
+            vid.playbackRate = LOOPPLAYBACKTATE;
+        }
+        document.getElementById('input1val').innerHTML = 'loop video rate (' + String(progressloopvideorate.value) + 'x) :'
+    }
+    f5();
+
+    var f51 = ()=>{
+        if(!SAFELOADED || DURATION <= 0)return
+        console.log(progressstarttime1.value)
+        STARTTIME1 = parseInt((progressstarttime1.value)*(DURATION)/100)
+        document.getElementById('inputstartval').value = sec2time(STARTTIME1).split(':').map((x)=>{return parseInt(x)}).join(' ')
+        vid.currentTime = STARTTIME1
+        if(parseFloat(progressendtime1.value) < parseFloat(progressstarttime1.value))f52()
+    }
+    var f52 = ()=>{
+        if(!SAFELOADED || DURATION <= 0)return
+        if(parseFloat(progressendtime1.value) < parseFloat(progressstarttime1.value))progressendtime1.value = progressstarttime1.value
+        ENDTIME1 = parseInt(progressendtime1.value*(DURATION)/100)
+        document.getElementById('inputendval').value = sec2time(ENDTIME1).split(':').map((x)=>{return parseInt(x)}).join(' ')
+        vid.currentTime = ENDTIME1
+    }
+    f51()
+    f52()
+    var f53 = () =>{
+        if(!SAFELOADED || DURATION <= 0)return
+        tmp = document.getElementById('inputstartval').value
+        tmp = tmp.split(' ').filter((x)=>{if(x.length > 0)return true; else return false;})
+        STARTTIME1 = time2sec(tmp)
+        if(STARTTIME1 > DURATION){
+            progressstarttime1.value = '100'
+            return f51()
+        }
+        if(DURATION > 0){
+            progressstarttime1.value = String(parseInt(STARTTIME1/DURATION*1000 )/ 10)
+            console.log('change start time by hands',STARTTIME1,sec2time(STARTTIME1))
+            vid.currentTime = STARTTIME1
+            if(STARTTIME1 > ENDTIME1){
+                document.getElementById('inputendval').value = document.getElementById('inputstartval').value
+                f54();
+            }
+        }
+    }
+    var f54 = () =>{
+        if(!SAFELOADED || DURATION <= 0)return
+        tmp = document.getElementById('inputendval').value
+        tmp = tmp.split(' ').filter((x)=>{if(x.length > 0)return true; else return false;})
+        ENDTIME1 = time2sec(tmp)
+        if(ENDTIME1 > DURATION){
+            progressendtime1.value = '100'
+            return f52()
+        }
+        if(STARTTIME1 > ENDTIME1){
+            document.getElementById('inputendval').value = document.getElementById('inputstartval').value
+            ENDTIME1 = STARTTIME1
+        }
+        if(DURATION > 0){
+            progressendtime1.value = String(parseInt(ENDTIME1/DURATION*1000 )/ 10)
+            console.log('change end time by hands',ENDTIME1,sec2time(ENDTIME1))
+            vid.currentTime = ENDTIME1
+        }
+    }
+
+    var f55 = () => {
+        if(!SAFELOADED || DURATION <= 0)return
+        document.getElementById('inputstartval').value = sec2time(parseInt(vid.currentTime)).replaceAll(':',' ');
+        f53();
+    }
+
+    var f56 = () => {
+        if(!SAFELOADED || DURATION <= 0)return
+        document.getElementById('inputendval').value = sec2time(parseInt(vid.currentTime)).replaceAll(':',' ');
+        f54();
+    }
+
+    var f6 = async (ptr = 0,reLoop = 1,ddbblevels = dblevels[showlevels.value],mode=-1) => {
+        if(!SAFELOADED || DURATION <= 0)return
+        if(ddbblevels===undefined)return
+        STOPLOOP = 1
+        await sleep(CHECKTIMEVAR)
+        res = ddbblevels
+        startTime = res[ptr][0]
+        endTime = res[ptr][1]
+        if(startTime >= DURATION || endTime >= DURATION ) {
+            if (reLoop == 1 || ptr + 1 != res.length )  {return f6((ptr + 1) % res.length,reLoop);}
+            else{return}
+        }
+        vid.currentTime = startTime
+        vid.playbackRate = LOOPPLAYBACKTATE;
+        STOPLOOP = 0
+        if(vid.paused){vid.play();}
+        function checkTime() {
+            //console.log(mode,ptr)
+            if(mode == -1){
+                document.getElementById(`${showlevels.value}_${ptr}_btn`).setAttribute('class','buttoncls')
+                console.log(mode,ptr,(ptr+res.length-1)%res.length)
+                document.getElementById(`${showlevels.value}_${(ptr+res.length-1)%res.length}_btn`).setAttribute('class','')
+            }
+            if (vid.paused || STOPLOOP){
+                vid.playbackRate = 1;
+                STOPLOOP = 1;
+                if(mode == -1){
+                    document.getElementById(`${showlevels.value}_${ptr}_btn`).setAttribute('class','')
+                }
+                return
+            }
+            if (vid.currentTime >= endTime || vid.currentTime < startTime) {
+                ptr = (ptr + 1) % res.length
+                startTime = res[ptr][0]
+                endTime = res[ptr][1]
+                if(startTime >= DURATION || endTime >= DURATION ) return f6(ptr,reLoop,ddbblevels)
+
+                if(ptr === 0&&reLoop != 1){STOPLOOP = 1;}
+                else{
+                    vid.currentTime = startTime
+                }
+            }
+            setTimeout(checkTime, CHECKTIMEVAR);
+        }
+        checkTime();
+    }
+    var f7 = ()=>{
+        if(!SAFELOADED || DURATION <= 0){
+            alert('no video...')
+            return
+        }
+        if(parseInt(selectlevels.value) === -1){
+            alert('no select level')
+            return
+        }
+        if(STARTTIME1 >= ENDTIME1){
+            alert('end time > start time at least 1')
+            return
+        }
+        // check if repush
+        if(dblevels[selectlevels.value]!=undefined){
+            door = 1
+            for(let x in dblevels[selectlevels.value]){
+                x = dblevels[selectlevels.value][x]
+                if(x[0]<= STARTTIME1 && x[1] > STARTTIME1)door = 0;
+                if(x[0]< ENDTIME1 && x[1] >= ENDTIME1)door = 0;
+                if(x[0]>= STARTTIME1 && x[1] <= ENDTIME1) door = 0;
+                if(door === 0)return
+            }
+        }
+        // push
+        MYGLOBALTIME1 += 1
+        if(dblevels[selectlevels.value]===undefined)
+            dblevels[selectlevels.value]=[[STARTTIME1,ENDTIME1,MYGLOBALTIME1]];
+        else{
+            dblevels[selectlevels.value].push([STARTTIME1,ENDTIME1,MYGLOBALTIME1]);
+        }
+        showlevels.value = selectlevels.value
+        f8();
+    }
+    var f8 = () => {
+        if(!SAFELOADED || DURATION <= 0){
+            showlevels.value = -1
+            alert('No video...')
+            return
+        }
+        // change showlevels html
+        safesave()
+        for(i in showlevels.childNodes){
+            x = showlevels.childNodes[i]
+            tmp = dblevels[x.value]||[]
+            tmp = tmp.length
+            if(x.value != -1){
+                x.innerHTML = x.value=='999'?`ReaderBuf(${tmp})`:`Level${x.value}(${tmp})`
+            }
+        }
+        if(showlevels.value == -1){
+            showlevelsblocks.innerHTML = ''
+            f4()
+            return
+        }
+        else{
+            if(dblevels[showlevels.value]!=undefined){
+                if(dblevels[showlevels.value].length===0){
+                    dblevels[showlevels.value] = undefined
+                    showlevels.value = -1
+                    
+                    // change layerMerge html
+                    document.getElementById('forlabel1').innerHTML = `layerMerge(${showlevels.value}):`
+                    // change clearlayerbtn html
+                    document.getElementById('clearlayerbtn').innerHTML = `clear(${showlevels.value})`
+
+                    return f8();
+                }
+                showlevelsblocks.innerHTML = ''
+                f4();
+                for(i in dblevels[showlevels.value]){
+                    x = dblevels[showlevels.value][i]
+                    newEle = document.createElement('button')
+                    newEle.setAttribute('onclick',`f3(${x[0]},${x[1]},1,"${showlevels.value}_${i}_btn")`)
+                    newEle.innerHTML = `${sec2time(x[0])}~${sec2time(x[1])}`
+                    newEle.setAttribute('style','display:block;')
+                    newEle.setAttribute('id',`${showlevels.value}_${i}_btn`)
+                    newEle.setAttribute('oncontextmenu',`removeBtn("${showlevels.value}_${i}_btn")`)
+                    showlevelsblocks.appendChild(newEle)
+                }
+
+                // change layerMerge html
+                document.getElementById('forlabel1').innerHTML = `layerMerge(${showlevels.value}):`
+                // change clearlayerbtn html
+                document.getElementById('clearlayerbtn').innerHTML = `clear(${showlevels.value})`
+            }
+            else{
+                showlevels.value = -1
+
+                // change layerMerge html
+                document.getElementById('forlabel1').innerHTML = `layerMerge(${showlevels.value}):`
+                // change clearlayerbtn html
+                document.getElementById('clearlayerbtn').innerHTML = `clear(${showlevels.value})`
+                return f8()
+            }
+        }
+    }
+
+    var f9=(cmd)=>{
+        if(!SAFELOADED || DURATION <= 0){
+            alert('No video...')
+            return
+        }
+        // n2buf
+        if(cmd == 1){
+            if(n2bufdb.value == -1)return
+            dblevels['999'] = dblevels[n2bufdb.value];
+            alert(`level${n2bufdb.value} -> BUFFER`)
+            showlevels.value = 999
+            f8()
+            n2bufdb.value = -1
+        }
+        // buf2n
+        else if(cmd == 2){
+            if(buf2ndb.value == -1)return
+            dblevels[buf2ndb.value] = dblevels['999'];
+            alert(`BUFFER -> level${buf2ndb.value}`)
+            showlevels.value = buf2ndb.value
+            f8()
+            buf2ndb.value = -1
+        }
+    }
+
+    var f10 = ()=>{
+        if(!SAFELOADED || DURATION <= 0){
+            alert('No video...')
+            return
+        }
+        if(dblevels[showlevels.value] === undefined)return;
+        dblevels[showlevels.value] = undefined
+        f8()
+    }
+
+    var removeBtn = (idx)=>{
+        event.preventDefault()
+        idx = idx.split('_')
+        if(idx[idx.length-1] === 'btn'){
+            idx = idx.slice(0,2)
+            f4();
+            dblevels[idx[0].trim()] = dblevels[idx[0].trim()].filter((x,i)=>{if(i === parseInt(idx[1])){return false;}return true;})
+            return f8();
+        }
+    }
+    var fsort = (cmd) => {
+        if(!SAFELOADED || DURATION <= 0){
+            alert('No video...');
+            return;
+        }
+        if(showlevels.value == -1)return;
+        if(dblevels[showlevels.value]===undefined)return
+        if(parseInt(cmd)===0){
+            dblevels[showlevels.value].sort((a,b)=>{return a[2]-b[2]})
+        }
+        else if(parseInt(cmd)===1){
+            dblevels[showlevels.value].sort((a,b)=>{return a[0]-b[0]})
+        }
+        else if(parseInt(cmd)===2){
+            dblevels[showlevels.value].sort((a,b)=>{return b[0]-a[0]})
+        }
+        f8();
+    }
+    var mergelayerfunc = (cmd=0) => {
+        if(!SAFELOADED || DURATION <= 0){
+            alert('No video...');
+            return;
+        }
+        if(showlevels.value == -1)return;
+        if(dblevels[showlevels.value]===undefined)return
+        if(parseInt(cmd)===0){
+            dblevels[showlevels.value].sort((a,b)=>{return a[2]-b[2]})
+        }
+        else if(parseInt(cmd)===1){
+            dblevels[showlevels.value].sort((a,b)=>{return a[0]-b[0]})
+        }
+        else if(parseInt(cmd)===2){
+            dblevels[showlevels.value].sort((a,b)=>{return b[0]-a[0]})
+        }
+        state = 0;
+        ans = []
+        tmp = []
+        ptr = -1
+        for(let i = 0; i < dblevels[showlevels.value].length; i++){
+            x = dblevels[showlevels.value][i]
+            if(state === 0){
+                ptr = x[1]
+                tmp = [x[0],x[1]]
+                state = 1;
+            }
+            else if(state === 1){
+                // continue
+                if(ptr === x[0]){
+                    ptr = x[1];
+                    tmp[1] = ptr;
+                }
+                // not continue => push
+                else{
+                    MYGLOBALTIME1 += 1;
+                    tmp.push(MYGLOBALTIME1);
+                    ans.push(tmp);
+                    tmp = [];
+                    i--;
+                    state = 0;
+                }
+            }
+        }
+        if(state === 1){
+            MYGLOBALTIME1 += 1;
+            tmp.push(MYGLOBALTIME1)
+            ans.push(tmp)
+            state = 0;
+        }
+        dblevels[showlevels.value] = ans;
+        f8();
+    }
+    var checkLayerLegal = (res) =>{
+        tmp = res.map(x=>{return x})
+        atmp = []
+        for(let i =0 ; i < tmp.length ; i++){
+            x = tmp[i]
+            door = 1
+            for(let j in atmp){
+                y = atmp[j]
+                if(y[0]<= x[0] && y[1] >= x[1])door = 0;
+                if(y[0]> x[0] && y[1] < x[1]){
+                    tmp[i] = [x[0],y[0],x[2]]
+                    tmp = tmp.slice(0,i+1).concat([[y[1],x[1],x[2]]]).concat(tmp.slice(i+1))
+                    door = 0
+                    i--;
+                    break
+                }
+                if(y[0]<= x[0] && y[1] > x[0]){
+                    x[0] = y[1]
+                }
+                if(y[0]< x[1] && y[1] >= x[1]){
+                    x[1] = y[0]
+                }
+                if(door === 0)break
+            }
+            // push
+            if(door === 1 && x[0] != x[1]){
+                atmp.push(x)
+            }
+        }
+        return atmp
+    }
+    var allmerge2layerN = (cmd=0) => {
+        if(!SAFELOADED || DURATION <= 0){
+            alert('No video...');
+            return;
+        }
+        if(cmd == 0){N = merge2layerNorigin.value}
+        else if(cmd == 1){N = merge2layerNascend.value}
+        layerN = String(parseInt(N))
+        if(layerN == -1 || parseInt(layerN) >= parseInt(document.getElementById('selectoptionnum').value))return;
+        ans = []
+        for(i in dblevels){
+            if(parseInt(i) < parseInt(layerN) || parseInt(i) === 999)continue;
+            if(dblevels[i] == undefined)continue;
+            if(dblevels.length == 0)continue;
+
+            layerNsortbyTime = dblevels[i].map(x=>{return x;}).sort((a,b)=>{return a-b})
+            for(j in layerNsortbyTime){
+                x = dblevels[i][j]
+                MYGLOBALTIME1 += 1
+                ans.push([x[0],x[1],MYGLOBALTIME1])
+            }
+        }
+
+        dblevels[layerN] = checkLayerLegal(ans)
+        showlevels.value = layerN
+        if(cmd == 0){merge2layerNorigin.value = -1}
+        else if(cmd == 1){merge2layerNascend.value = -1}
+        alert(`successful! all merge to ${layerN}`)
+        mergelayerfunc(cmd)
+    }
+
+
+    inputdb1.addEventListener('change',()=>{
+        filetxtlist = event.target.files
+        reader = new FileReader()
+        reader.readAsText(filetxtlist[0])
+        reader.onload = function(e){
+            try {
+                tmp = reader.result
+                cmd = 0
+                if(tmp.indexOf(":")===-1){
+                    // list 形式
+                    cmd = 0
+                }else{
+                    // real 形式
+                    cmd = 1
+                }
+                ans = []
+                if(cmd === 0){
+                    tmp = tmp.trim().replaceAll('\r','').replaceAll('\n','').replaceAll('[','').replaceAll(']','').replaceAll(' ','').split(',')
+                    ttmp = []
+                    for(i in tmp){
+                        x = parseInt(tmp[i])
+                        if(i%2==0){
+                            ttmp = [x]
+                        }else{
+                            ttmp.push(x)
+                            MYGLOBALTIME1 += 1;
+                            ttmp.push(MYGLOBALTIME1)
+                            ans.push(ttmp)
+                        }
+                    }
+                }else if(cmd === 1){
+                    maxl = -1
+                    tmp = tmp.replaceAll('\r','').split('\n').map(x => {if(maxl < x.trim().length && x.slice(20,).indexOf(':')!=-1)maxl = x.trim().length;return x.trim();})
+                    tmp = tmp.filter((x)=>{if(x.length === maxl)return x}).map((x)=>{x=x.split(' ').filter(y=>{return y.indexOf(":") != -1}); return x})
+                    for(i in tmp){
+                        if(tmp[i].length != 4){
+                            throw 'Wrong type1'
+                        }
+                        x = tmp[i]
+                        x = x.filter((y,i)=>{return i < 2;}).map(y=>time2sec(y.slice(0,y.length-3).split(':')))
+                        tmp[i] = x
+                    }
+                    for(i in tmp){
+                        MYGLOBALTIME1+=1
+                        x = tmp[i]
+                        ans.push([x[0],x[1],MYGLOBALTIME1])
+                    }
+                }
+                dblevels['999'] = ans;
+                inputdb1.value = ''
+                showlevels.value = 999;
+                reader = null
+                f8();
+            } catch (error) {
+                console.error(error)
+                dblevels['999'] = dblevels['999'];
+            }
+        }
+    })
+    var initselect = ()=>{
+        N = selectoptionnum.value;
+        N = parseInt(N)
+        if(!(N >= 2))N = 2;
+        selectlevels.innerHTML = ''
+        showlevels.innerHTML = ''
+        n2bufdb.innerHTML = ''
+        buf2ndb.innerHTML = ''
+        merge2layerNascend.innerHTML = ''
+        merge2layerNorigin.innerHTML = ''
+        fsaveformal.innerHTML = ''
+        fsavetime.innerHTML = ''
+        fsavesec.innerHTML = ''
+        newEle = document.createElement('option')
+        newEle.setAttribute('value','-1');
+        newEle.innerHTML = '選擇Level層級'
+        selectlevels.appendChild(newEle)
+        newEle = document.createElement('option')
+        newEle.setAttribute('value','-1');
+        newEle.innerHTML = '秀出Level內容'
+        showlevels.appendChild(newEle)
+        newEle = document.createElement('option')
+        newEle.setAttribute('value','-1');
+        newEle.innerHTML = `LevelN -> BUF`
+        n2bufdb.appendChild(newEle)
+        newEle = document.createElement('option')
+        newEle.setAttribute('value','-1');
+        newEle.innerHTML = `BUF -> LevelN`
+        buf2ndb.appendChild(newEle)
+        newEle = document.createElement('option')
+        newEle.setAttribute('value','-1');
+        newEle.innerHTML = `Ascend`
+        merge2layerNascend.appendChild(newEle)
+        newEle = document.createElement('option')
+        newEle.setAttribute('value','-1');
+        newEle.innerHTML = `Origin`
+        merge2layerNorigin.appendChild(newEle)
+        newEle = document.createElement('option')
+        newEle.setAttribute('value','-1');
+        newEle.innerHTML = `LayerNsaver(formal)`
+        fsaveformal.appendChild(newEle)
+        newEle = document.createElement('option')
+        newEle.setAttribute('value','-1');
+        newEle.innerHTML = `LayerNsaver(time)`
+        fsavetime.appendChild(newEle)
+        newEle = document.createElement('option')
+        newEle.setAttribute('value','-1');
+        newEle.innerHTML = `LayerNsaver(sec)`
+        fsavesec.appendChild(newEle)
+        for(let i = 0; i < N ; i++){
+            newEle = document.createElement('option')
+            newEle.setAttribute('value',String(i));
+            newEle.innerHTML = `Level${i}`
+            selectlevels.appendChild(newEle)
+            newEle = document.createElement('option')
+            newEle.setAttribute('value',String(i));
+            newEle.innerHTML = `Level${i}`
+            showlevels.appendChild(newEle)
+            newEle = document.createElement('option')
+            newEle.setAttribute('value',String(i));
+            newEle.innerHTML = `Level${i}`
+            n2bufdb.appendChild(newEle)
+            newEle = document.createElement('option')
+            newEle.setAttribute('value',String(i));
+            newEle.innerHTML = `Level${i}`
+            buf2ndb.appendChild(newEle)
+            newEle = document.createElement('option')
+            newEle.setAttribute('value',String(i));
+            newEle.innerHTML = `Level${i}`
+            merge2layerNascend.appendChild(newEle)
+            newEle = document.createElement('option')
+            newEle.setAttribute('value',String(i));
+            newEle.innerHTML = `Level${i}`
+            merge2layerNorigin.appendChild(newEle)
+            newEle = document.createElement('option')
+            newEle.setAttribute('value',String(i));
+            newEle.innerHTML = `Level${i}`
+            fsavesec.appendChild(newEle)
+            newEle = document.createElement('option')
+            newEle.setAttribute('value',String(i));
+            newEle.innerHTML = `Level${i}`
+            fsavetime.appendChild(newEle)
+            newEle = document.createElement('option')
+            newEle.setAttribute('value',String(i));
+            newEle.innerHTML = `Level${i}`
+            fsaveformal.appendChild(newEle)
+        }
+        newEle = document.createElement('option')
+        newEle.setAttribute('value','999');
+        newEle.innerHTML = 'ReaderBuf'
+        selectlevels.appendChild(newEle)
+        newEle = document.createElement('option')
+        newEle.setAttribute('value','999');
+        newEle.innerHTML = 'ReaderBuf'
+        showlevels.appendChild(newEle)
+        mini = N-1
+        for(i in dblevels){
+            if(parseInt(i) >= N && parseInt(i)!=999){
+                dblevels[i] = undefined;
+            }
+            if(dblevels[i]!=undefined){
+                if(mini>parseInt(i)&&dblevels[i].length>0)mini=parseInt(i)
+            }
+        }
+        // change showlevels html
+        for(i in showlevels.childNodes){
+            x = showlevels.childNodes[i]
+            tmp = dblevels[x.value]||[]
+            tmp = tmp.length
+            if(x.value != -1){
+                x.innerHTML = x.value=='999'?`ReaderBuf(${tmp})`:`Level${x.value}(${tmp})`
+            }
+        }
+        if(SAFELOADED === 1){
+            showlevels.value = mini;
+            f8()
+        }
+    }
+    initselect(10);
+    var fsave = (cmd) => {
+        layerN = -1
+        if(cmd == 1){
+            layerN = fsavesec.value
+            fsavesec.value = -1
+        }
+        else if(cmd == 2){
+            layerN = fsavetime.value
+            fsavetime.value = -1
+        }
+        else if(cmd == 3){
+            layerN = fsaveformal.value
+            fsaveformal.value = -1
+        }
+        if(dblevels[layerN]==undefined)return
+        if(dblevels[layerN].length == 0)return
+        res = dblevels[layerN]
+        if(cmd == 1){
+            ans ='[['+res.map(x=>{return x.slice(0,2)}).join('],[') + ']]'
+            var blob = new Blob([ans], {type: "text/plain;charset=utf-8"});
+            saveAs(blob, `${VIDEONAME}.txt`);
+        }
+        else if(cmd == 2){
+            ans ='[['+res.map(x=>{return x.slice(0,2).map((x)=>{return `"${sec2time(x)}"`})}).join('],[') + ']]'
+            var blob = new Blob([ans], {type: "text/plain;charset=utf-8"});
+            saveAs(blob, `${VIDEONAME}.txt`);
+        }
+        else if(cmd == 3){
+            ans = [`TITLE: ${VIDEONAME}`]
+            ans.push('FCM: NON-DROP FRAME')
+            ans.push('')
+            nowtime =  0
+            for(i in res){
+                i = parseInt(i);
+                ii = i+1;
+                x = res[i]
+                ans.push(`${String(ii).length === 3? String(ii): String(ii).length === 2? '0'+String(ii): '00'+String(ii)}  AX       AA/V  C        ${sec2time(x[0])}:00 ${sec2time(x[1])}:00 ${sec2time(nowtime)}:00 ${sec2time(nowtime+x[1]-x[0])}:00`)
+                ans.push(`* FROM CLIP NAME: ${VIDEONAME}`)
+                ans.push('* AUDIO LEVEL AT 00:00:00:00 IS 0 DB  (REEL AX A1)')
+                ans.push('* AUDIO LEVEL AT 00:00:00:00 IS 0 DB  (REEL AX A2)')
+                ans.push('')
+                nowtime += x[1]-x[0]
+            }
+            ans = ans.join('\r\n')
+            var blob = new Blob([ans], {type: "text/plain;charset=utf-8"});
+            saveAs(blob, `${VIDEONAME}.edl`);            
+        }
+    }
+
+    var discreteTime = (ss,ee,xx,yy, res = []) =>{
+        if(xx <= 0 || yy <= 0){
+            xx = ee-ss;
+            yy = 0;
+        }
+        l = ee - ss;
+        if(l <= 2*xx){
+            res.push([ss,ee])
+            return
+        }
+        else if(l>2*xx &&l <= 2*xx + 2*yy){
+            res.push([ss,ss+xx])
+            res.push([ee-xx,ee])
+            return
+        }
+        else{
+            res.push([ss,ss+xx])
+            res.push([ee-xx,ee])
+            return discreteTime(ss + xx + yy,ee - xx - yy,xx,yy,res)
+        }
+    }
+    var rendersneakvid = ()=>{
+        if(!SAFELOADED || DURATION <= 0){
+            alert('No video...');
+            return 1;
+        }
+        if(ENDTIME1 <= STARTTIME1)return 1;
+        XX = parseInt(document.getElementById('inputdurationtime').value)
+        YY = parseInt(document.getElementById('inputspacetime').value)
+        SNEAKVID = []
+        discreteTime(STARTTIME1,ENDTIME1,XX,YY,SNEAKVID)
+        SNEAKVID.sort((a,b)=>{return a[0]-b[0];})
+        f6(0,1,SNEAKVID,0)
+    }
+
+    var checkrenderspacial = ()=>{
+        if(!SAFELOADED || DURATION <= 0){
+            document.getElementById('inputspacetime').value = 1
+            document.getElementById('inputdurationtime').value = 1
+            alert('No video...');
+            return;
+        }
+        f4()
+        tmp = document.getElementById('inputspacetime').value
+        if(!(parseInt(tmp) >= 1)){
+            document.getElementById('inputspacetime').value = 1
+        }
+        tmp = document.getElementById('inputdurationtime').value
+        if(!(parseInt(tmp) >= 1)){
+            document.getElementById('inputdurationtime').value = 1
+        }
+    }
+    var rendersneakvidsubmit = ()=>{
+        res = rendersneakvid()
+        if(res != 1){
+            f4();
+            dblevels['999'] = []
+            for(i in SNEAKVID){
+                x = SNEAKVID[i]
+                MYGLOBALTIME1 += 1
+                dblevels['999'].push([x[0],x[1],MYGLOBALTIME1])
+            }
+            showlevels.value = '999';
+            f8();
+        }
+    }
+
+    // load...
+    var safeload =async () => {
+        db = localStorage['db'] || '{}'
+        alert(`try to load ${db}`)
+        db = JSON.parse(db)
+        dbdoor = 0
+        for(idx in db){
+            x = db[idx]
+            if(idx === 'dblevels'){
+                dblevels = x
+            }
+            else if(idx === 'VIDEONAME'){
+                VIDEONAME = x
+            }
+            else if(idx === 'inputName'){
+                inputName.value = x
+            }
+            else if(idx === 'MYGLOBALTIME1'){
+                MYGLOBALTIME1 = x
+            }
+            else if(idx === 'selectoptionnum'){
+                selectoptionnum.value = x
+                initselect()
+            }
+        }
+        f1()
+        document.getElementById('fileInput').value = ''
+    }
+
+
+
+
+</script>
+</html>
